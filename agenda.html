@@ -26,89 +26,132 @@
         <div class="agenda-tools no-print">
           <div>
             <h1 style="font-size: 1.5rem;">座談會議程</h1>
-            <p class="small">此頁保持乾淨版面；下載 DOCX 會依照下方議程內容即時產生。</p>
+            <p class="small">可直接修改欄位文字，拖拉左側把手調整順序；下載 DOCX 會依照目前畫面內容產生。</p>
           </div>
-          <button class="button primary" type="button" data-download-docx>下載最新 DOCX 議程</button>
+          <div class="actions" style="margin-top: 0;">
+            <button class="button secondary" type="button" data-add-agenda-row>新增列</button>
+            <button class="button secondary" type="button" data-save-agenda>儲存內容</button>
+            <button class="button secondary" type="button" data-reset-agenda>恢復預設</button>
+            <button class="button primary" type="button" data-download-docx>下載最新 DOCX 議程</button>
+          </div>
         </div>
 
-        <article class="agenda-sheet">
+        <p class="editor-status no-print" data-agenda-status>目前內容會暫存在這台裝置的瀏覽器。</p>
+
+        <article class="agenda-sheet" data-agenda-editor>
           <div class="agenda-title">
-            <h1 data-docx-title>近期國際與兩岸情勢發展對 2026 年底臺灣地方選舉之影響</h1>
-            <p data-docx-subtitle>座談會議程</p>
+            <h1 data-docx-title contenteditable="true" spellcheck="false">近期國際與兩岸情勢發展對 2026 年底臺灣地方選舉之影響</h1>
+            <p data-docx-subtitle contenteditable="true" spellcheck="false">座談會議程</p>
           </div>
 
           <ul class="agenda-meta">
-            <li><b>日期</b><span data-docx-meta="日期">2026 年 8 月 7 日（星期五）</span></li>
-            <li><b>時間</b><span data-docx-meta="時間">15:00-17:00</span></li>
-            <li><b>地點</b><span data-docx-meta="地點">國立中山大學社會科學院</span></li>
-            <li><b>主辦單位</b><span data-docx-meta="主辦單位">國立中山大學政治學研究所</span></li>
-            <li><b>協辦單位</b><span data-docx-meta="協辦單位">東海大學中國大陸暨區域發展研究中心</span></li>
-            <li><b>晚宴</b><span data-docx-meta="晚宴">17:30 起，地點待確認</span></li>
+            <li><b>日期</b><span data-docx-meta="日期" contenteditable="true" spellcheck="false">2026 年 8 月 7 日（星期五）</span></li>
+            <li><b>時間</b><span data-docx-meta="時間" contenteditable="true" spellcheck="false">15:00-17:00</span></li>
+            <li><b>地點</b><span data-docx-meta="地點" contenteditable="true" spellcheck="false">國立中山大學社會科學院</span></li>
+            <li><b>主辦單位</b><span data-docx-meta="主辦單位" contenteditable="true" spellcheck="false">國立中山大學政治學研究所</span></li>
+            <li><b>協辦單位</b><span data-docx-meta="協辦單位" contenteditable="true" spellcheck="false">東海大學中國大陸暨區域發展研究中心</span></li>
+            <li><b>晚宴</b><span data-docx-meta="晚宴" contenteditable="true" spellcheck="false">17:30 起，地點待確認</span></li>
           </ul>
 
-          <table class="agenda-table" aria-label="座談會議程">
+          <table class="agenda-table editable-agenda-table" aria-label="座談會議程">
             <thead>
               <tr>
+                <th class="drag-cell no-print" aria-label="排序"></th>
                 <th>時間</th>
                 <th>議程</th>
                 <th>主講／負責人</th>
+                <th>備註</th>
+                <th class="row-actions no-print">操作</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody data-agenda-body>
               <tr data-agenda-row>
-                <td data-label="時間">15:00-15:05</td>
-                <td data-label="議程">主持人開場</td>
-                <td data-label="主講／負責人">陳宗巖／國立中山大學政治學研究所教授兼所長</td>
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">15:00-15:05</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">主持人開場</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">陳宗巖／國立中山大學政治學研究所教授兼所長</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">中山確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
               </tr>
               <tr data-agenda-row>
-                <td data-label="時間">15:05-15:10</td>
-                <td data-label="議程">貴賓致詞</td>
-                <td data-label="主講／負責人">邱垂正／大陸委員會主任委員</td>
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">15:05-15:10</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">貴賓致詞</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">邱垂正／大陸委員會主任委員</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">中山確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
+              </tr>
+              <tr data-agenda-row data-auto-label="panel">
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">15:10-15:22</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">與談一</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">張峻豪／東海大學政治學系教授兼系主任</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">東海確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
+              </tr>
+              <tr data-agenda-row data-auto-label="panel">
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">15:22-15:34</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">與談二</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">蔡榮祥／國立中正大學政治學系教授</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">中山確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
+              </tr>
+              <tr data-agenda-row data-auto-label="panel">
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">15:34-15:46</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">與談三</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">林子立／東海大學政治學系教授</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">東海確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
+              </tr>
+              <tr data-agenda-row data-auto-label="panel">
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">15:46-15:58</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">與談四</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">南部學者／待定，國立中山大學負責邀請</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">中山確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
+              </tr>
+              <tr data-agenda-row data-auto-label="panel">
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">15:58-16:10</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">與談五</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">高雄市在地人士／待定，東海大學負責邀請</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">東海確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
+              </tr>
+              <tr data-agenda-row data-auto-label="panel">
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">16:10-16:22</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">與談六</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">高雄市在地人士／待定，國立中山大學負責邀請</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">中山確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
               </tr>
               <tr data-agenda-row>
-                <td data-label="時間">15:10-15:22</td>
-                <td data-label="議程">與談一</td>
-                <td data-label="主講／負責人">張峻豪／東海大學政治學系教授兼系主任</td>
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">16:22-16:42</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">綜合座談與現場問答</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">主持人及全體與談人</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">中山／東海確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
               </tr>
               <tr data-agenda-row>
-                <td data-label="時間">15:22-15:34</td>
-                <td data-label="議程">與談二</td>
-                <td data-label="主講／負責人">蔡榮祥／國立中正大學政治學系教授</td>
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">16:42-17:00</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">主持人總結與閉幕</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">陳宗巖／國立中山大學政治學研究所教授兼所長</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">中山確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
               </tr>
               <tr data-agenda-row>
-                <td data-label="時間">15:34-15:46</td>
-                <td data-label="議程">與談三</td>
-                <td data-label="主講／負責人">林子立／東海大學政治學系教授</td>
-              </tr>
-              <tr data-agenda-row>
-                <td data-label="時間">15:46-15:58</td>
-                <td data-label="議程">與談四</td>
-                <td data-label="主講／負責人">南部學者／待定，國立中山大學負責邀請</td>
-              </tr>
-              <tr data-agenda-row>
-                <td data-label="時間">15:58-16:10</td>
-                <td data-label="議程">與談五</td>
-                <td data-label="主講／負責人">高雄市在地人士／待定，東海大學負責邀請</td>
-              </tr>
-              <tr data-agenda-row>
-                <td data-label="時間">16:10-16:22</td>
-                <td data-label="議程">與談六</td>
-                <td data-label="主講／負責人">高雄市在地人士／待定，國立中山大學負責邀請</td>
-              </tr>
-              <tr data-agenda-row>
-                <td data-label="時間">16:22-16:42</td>
-                <td data-label="議程">綜合座談與現場問答</td>
-                <td data-label="主講／負責人">主持人及全體與談人</td>
-              </tr>
-              <tr data-agenda-row>
-                <td data-label="時間">16:42-17:00</td>
-                <td data-label="議程">主持人總結與閉幕</td>
-                <td data-label="主講／負責人">陳宗巖／國立中山大學政治學研究所教授兼所長</td>
-              </tr>
-              <tr data-agenda-row>
-                <td data-label="時間">17:30 起</td>
-                <td data-label="議程">晚宴</td>
-                <td data-label="主講／負責人">地點、出席名單與經費負擔待確認</td>
+                <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
+                <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false">17:30 起</td>
+                <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false">晚宴</td>
+                <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false">地點、出席名單與經費負擔待確認</td>
+                <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false">中山／東海確認</td>
+                <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
               </tr>
             </tbody>
           </table>
