@@ -173,9 +173,9 @@ function setupConfirmForm() {
 }
 
 /* =========================================================================
-   下載 Word 議程（乾淨版，不含「確認方」欄）
+   下載 Word 議程（乾淨版，不含「確認方」欄；強制一頁）
    ========================================================================= */
-function downloadWord() {
+function buildWordDoc() {
   const infoRows = [
     ["日　期", MEETING.date],
     ["時　間", MEETING.time],
@@ -196,38 +196,43 @@ function downloadWord() {
     })
     .join("");
 
-  const doc = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+  return `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
   <head><meta charset="utf-8"><title>${esc(MEETING.subtitle)} 議程</title>
+  <!--[if gte mso 9]><xml><w:WordDocument><w:View>Print</w:View><w:Zoom>100</w:Zoom></w:WordDocument></xml><![endif]-->
   <style>
-    @page { size: A4; margin: 1.5cm 1.9cm; }
-    body { font-family: "Microsoft JhengHei","Noto Sans TC",sans-serif; color:#222; font-size:10.5pt; line-height:1.4; }
-    .title { text-align:center; font-size:18pt; font-weight:bold; margin:2pt 0 4pt; }
-    .sub { text-align:center; font-size:10pt; color:#888; letter-spacing:3pt; margin:0 0 12pt; }
-    hr.rule { border:none; border-top:0.75pt solid #cfcfcf; margin:0 0 11pt; }
-    table.info { border-collapse:collapse; margin:0 auto 13pt; }
-    table.info td { border:none; padding:2pt 0; font-size:9.5pt; vertical-align:top; }
-    table.info td.k { color:#8a6d1f; font-weight:bold; padding-right:16pt; white-space:nowrap; letter-spacing:1pt; }
+    @page Section1 { size:595.3pt 841.9pt; margin:1.3cm 1.8cm 1.3cm 1.8cm; mso-page-orientation:portrait; }
+    div.Section1 { page:Section1; }
+    body { font-family:"Microsoft JhengHei","Noto Sans TC",sans-serif; color:#222; font-size:11pt; }
+    p, p.MsoNormal, li.MsoNormal, div.MsoNormal { margin:0; mso-line-height-rule:exactly; line-height:1.05; mso-margin-top-alt:0; mso-margin-bottom-alt:0; }
+    .title { text-align:center; font-size:18pt; font-weight:bold; line-height:1.2; margin:0 0 5pt; }
+    .sub { text-align:center; font-size:11pt; color:#8a8a8a; letter-spacing:3pt; margin:0 0 12pt; }
+    hr.rule { border:none; border-top:1pt solid #cccccc; margin:0 0 12pt; }
+    table.info { border-collapse:collapse; width:100%; margin:0 0 14pt; }
+    table.info td { border:none; padding:2pt 4pt; font-size:11pt; line-height:1.05; vertical-align:top; }
+    table.info td.k { color:#8a6d1f; font-weight:bold; white-space:nowrap; width:58pt; }
     table.info td.v { color:#333; }
     table.ag { border-collapse:collapse; width:100%; }
-    table.ag th { text-align:left; font-size:9pt; color:#666; font-weight:bold; letter-spacing:1pt; padding:0 9pt 6pt; border-bottom:1.5pt solid #2a6450; }
-    table.ag th.tt { width:78pt; }
-    table.ag td { border:none; border-bottom:0.5pt solid #e3e3e3; padding:6pt 9pt; font-size:10pt; vertical-align:top; }
+    table.ag th { text-align:left; font-size:10.5pt; color:#555; font-weight:bold; padding:0 9pt 7pt; border-bottom:1.5pt solid #2a6450; }
+    table.ag td { border:none; border-bottom:0.5pt solid #dcdcdc; padding:8pt 9pt; font-size:11pt; line-height:1.1; vertical-align:top; }
     table.ag td.t { color:#777; white-space:nowrap; }
     table.ag td.i { font-weight:bold; color:#1c4838; }
     table.ag tr.dinner td { color:#999; font-style:italic; }
   </style></head>
-  <body>
+  <body><div class="Section1">
     <div class="title">${esc(MEETING.title)}</div>
     <div class="sub">${esc(MEETING.subtitle)}</div>
     <hr class="rule">
     <table class="info">${infoRows}</table>
     <table class="ag">
-      <thead><tr><th class="tt">時間</th><th>議程</th><th>主講／負責人</th></tr></thead>
+      <colgroup><col style="width:13%"><col style="width:21%"><col style="width:66%"></colgroup>
+      <thead><tr><th>時間</th><th>議程</th><th>主講／負責人</th></tr></thead>
       <tbody>${bodyRows}</tbody>
     </table>
-  </body></html>`;
+  </div></body></html>`;
+}
 
-  const blob = new Blob(["﻿", doc], { type: "application/msword" });
+function downloadWord() {
+  const blob = new Blob(["﻿", buildWordDoc()], { type: "application/msword" });
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

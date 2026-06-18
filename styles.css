@@ -157,4 +157,5 @@ main { padding: 32px 0 60px; }
   .agenda-table td { border: none; padding: 5px 12px; }
   .agenda-table td::before { content: attr(data-label) "："; color: var(--muted); font-weight: 600; font-size: 0.8rem; }
   .agenda-table td.item::before { content: ""; }
+  .agenda-table td[data-label="主講／負責人"]::before { content: ""; }
 }
