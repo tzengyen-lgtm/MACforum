@@ -67,7 +67,7 @@ function createAgendaRow(row = {}) {
   return tr;
 }
 
-function saveAgendaState(message = "已自動儲存議程內容。") {
+function saveAgendaState(message = "已本機暫存議程內容。") {
   if (!document.querySelector("[data-agenda-editor]")) return;
   localStorage.setItem(agendaKey, JSON.stringify(agendaStateFromPage()));
   setAgendaStatus(message);
@@ -101,7 +101,7 @@ function bindAgendaRow(row) {
   row.querySelectorAll("[contenteditable]").forEach((cell) => {
     cell.addEventListener("input", () => {
       if (cell.dataset.field === "item" && row.dataset.autoLabel === "panel") row.dataset.customItem = "true";
-      saveAgendaState("已自動儲存議程修改。");
+      saveAgendaState("已本機暫存議程修改。");
     });
     cell.addEventListener("keydown", (event) => {
       if (event.key === "Enter" && !event.shiftKey) {
@@ -138,7 +138,7 @@ function loadAgendaState() {
   document.querySelectorAll("[data-agenda-row]").forEach(bindAgendaRow);
 
   if (!raw) {
-    setAgendaStatus("填寫或調整後會自動儲存在這台裝置。");
+    setAgendaStatus("填寫或調整後會本機暫存於目前瀏覽器。");
     return;
   }
 
@@ -187,7 +187,7 @@ function setupAgendaEditor() {
   loadAgendaState();
 
   editor.querySelectorAll("[contenteditable]").forEach((el) => {
-    el.addEventListener("input", () => saveAgendaState("已自動儲存議程修改。"));
+    el.addEventListener("input", () => saveAgendaState("已本機暫存議程修改。"));
     el.addEventListener("keydown", (event) => {
       if (event.key === "Enter" && !event.shiftKey) {
         event.preventDefault();
@@ -241,7 +241,7 @@ function confirmationStateFromPage() {
 
 function saveConfirmationState() {
   localStorage.setItem(tunghaiConfirmKey, JSON.stringify(confirmationStateFromPage()));
-  setConfirmStatus(`已自動儲存 ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}`);
+  setConfirmStatus(`已本機暫存 ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}`);
 }
 
 function loadConfirmationState() {

@@ -167,6 +167,15 @@ h3 {
   font-size: 1.05rem;
 }
 
+.scope-note {
+  max-width: 880px;
+  margin: 16px 0 0;
+  border-left: 4px solid var(--gold);
+  background: #fff8e8;
+  padding: 12px 14px;
+  color: #473519;
+}
+
 .entry-actions,
 .actions {
   display: flex;
