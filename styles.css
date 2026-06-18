@@ -399,6 +399,12 @@ th {
   width: 150px;
 }
 
+.editable-agenda-table [data-field="note"] {
+  width: 132px;
+  color: var(--green);
+  font-weight: 800;
+}
+
 .editable-agenda-table .row-actions {
   width: 142px;
   white-space: nowrap;

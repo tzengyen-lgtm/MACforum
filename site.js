@@ -1,4 +1,4 @@
-const agendaKey = "mac-forum-agenda-state-v5";
+const agendaKey = "mac-forum-agenda-state-v6";
 const tunghaiConfirmKey = "mac-forum-tunghai-confirm-v1";
 const chineseNumbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
 
@@ -37,6 +37,7 @@ function agendaStateFromPage() {
       time: fieldText(row, "time"),
       item: fieldText(row, "item"),
       speaker: fieldText(row, "speaker"),
+      note: fieldText(row, "note"),
       autoLabel: row.dataset.autoLabel || "",
       customItem: row.dataset.customItem || "",
     })),
@@ -54,12 +55,14 @@ function createAgendaRow(row = {}) {
     <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false" class="editable-cell"></td>
     <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false" class="editable-cell"></td>
     <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false" class="editable-cell"></td>
+    <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false" class="editable-cell screen-note no-print"></td>
     <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
   `;
 
   tr.querySelector('[data-field="time"]').textContent = row.time || "";
   tr.querySelector('[data-field="item"]').textContent = row.item || "";
   tr.querySelector('[data-field="speaker"]').textContent = row.speaker || "";
+  tr.querySelector('[data-field="note"]').textContent = row.note || "待確認";
   bindAgendaRow(tr);
   return tr;
 }
