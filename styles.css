@@ -46,6 +46,39 @@ a {
   backdrop-filter: blur(10px);
 }
 
+.anchorbar {
+  position: sticky;
+  top: 65px;
+  z-index: 9;
+  border-bottom: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(10px);
+}
+
+.anchorbar-inner {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 48px;
+  overflow-x: auto;
+}
+
+.anchorbar a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  border-radius: 6px;
+  color: var(--ink);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.anchorbar a:hover {
+  background: var(--surface-soft);
+  color: var(--green);
+}
+
 .topbar-inner,
 .wrap {
   width: min(1080px, calc(100% - 32px));
@@ -196,6 +229,21 @@ h3 {
 
 .main {
   padding: 34px 0 56px;
+}
+
+.planning-page {
+  padding-top: 24px;
+}
+
+.planning-intro {
+  padding: 0 0 26px;
+  border-bottom: 1px solid var(--line);
+}
+
+#agenda-section,
+#work-section,
+#open-section {
+  scroll-margin-top: 128px;
 }
 
 .band {
@@ -463,6 +511,10 @@ th {
   gap: 18px;
 }
 
+.planning-tasks {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
 .task-group {
   border-top: 2px solid var(--green);
   padding-top: 14px;
@@ -481,6 +533,11 @@ th {
   padding: 14px;
   display: grid;
   gap: 10px;
+}
+
+.task-item:has(input:checked) {
+  border-color: rgba(40, 95, 76, 0.45);
+  background: #f7fbf8;
 }
 
 .task-main {
@@ -552,12 +609,17 @@ th {
     padding: 12px 0;
   }
 
+  .anchorbar {
+    top: 92px;
+  }
+
   .nav {
     justify-content: flex-start;
   }
 
   .grid.two,
-  .agenda-meta {
+  .agenda-meta,
+  .planning-tasks {
     grid-template-columns: 1fr;
   }
 
@@ -660,6 +722,7 @@ th {
 
 @media print {
   .topbar,
+  .anchorbar,
   .agenda-tools,
   .footer,
   .no-print {

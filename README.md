@@ -5,8 +5,7 @@
 ## 頁面
 
 - `index.html`：網站首頁
-- `agenda.html`：乾淨版議程，可依照網頁最新內容下載 DOCX 議程
-- `agenda.html`：可編輯與拖拉排序的議程頁，可下載 DOCX
+- `agenda.html`：單頁會議籌辦頁，包含可編輯議程、分工狀態與 DOCX 下載
 
 ## GitHub Pages
 

@@ -3,7 +3,8 @@ const site = {
   fileTitle: "20260807_陸委會座談會議程",
 };
 
-const agendaKey = "mac-forum-agenda-state-v3";
+const agendaKey = "mac-forum-agenda-state-v4";
+const planningTaskKey = "mac-forum-planning-task-state-v1";
 const chineseNumbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
 
 function cleanText(value) {
@@ -75,7 +76,6 @@ function setAgendaStatus(message) {
 function createAgendaRow(row = {}) {
   const tr = document.createElement("tr");
   tr.dataset.agendaRow = "";
-  tr.draggable = true;
   if (row.autoLabel) tr.dataset.autoLabel = row.autoLabel;
   if (row.customItem) tr.dataset.customItem = row.customItem;
 
@@ -97,7 +97,6 @@ function createAgendaRow(row = {}) {
 }
 
 function bindAgendaRow(row) {
-  row.draggable = false;
   const handle = row.querySelector("[data-drag-handle]");
   if (handle) handle.draggable = true;
 
@@ -115,9 +114,7 @@ function bindAgendaRow(row) {
 
   row.querySelectorAll("[contenteditable]").forEach((cell) => {
     cell.addEventListener("input", () => {
-      if (cell.dataset.field === "item" && row.dataset.autoLabel === "panel") {
-        row.dataset.customItem = "true";
-      }
+      if (cell.dataset.field === "item" && row.dataset.autoLabel === "panel") row.dataset.customItem = "true";
       saveAgendaState("已暫存修改。");
     });
   });
@@ -148,8 +145,7 @@ function renumberPanelRows() {
   let count = 0;
   document.querySelectorAll("[data-agenda-row]").forEach((row) => {
     if (row.dataset.autoLabel !== "panel" || row.dataset.customItem === "true") return;
-    const label = chineseNumbers[count] || String(count + 1);
-    row.querySelector('[data-field="item"]').textContent = `與談${label}`;
+    row.querySelector('[data-field="item"]').textContent = `與談${chineseNumbers[count] || count + 1}`;
     count += 1;
   });
 }
@@ -165,9 +161,6 @@ function loadAgendaState() {
   document.querySelectorAll("[data-agenda-row]").forEach(bindAgendaRow);
 
   if (!raw) {
-    document.querySelectorAll("[data-agenda-row]").forEach((row) => {
-      if (row.dataset.autoLabel === "panel") row.dataset.customItem = "";
-    });
     setAgendaStatus("目前內容會暫存在這台裝置的瀏覽器。");
     return;
   }
@@ -236,14 +229,7 @@ function setupAgendaEditor() {
   });
 
   document.querySelector("[data-add-agenda-row]")?.addEventListener("click", () => {
-    body.appendChild(
-      createAgendaRow({
-        time: "",
-        item: "新增議程",
-        speaker: "姓名／單位",
-        note: "待確認",
-      })
-    );
+    body.appendChild(createAgendaRow({ time: "", item: "新增議程", speaker: "姓名／單位", note: "待確認" }));
     saveAgendaState("已新增議程列。");
   });
 
@@ -256,10 +242,59 @@ function setupAgendaEditor() {
   });
 }
 
+function getPlanningTasks() {
+  return [...document.querySelectorAll("[data-task-id]")].map((el) => ({
+    id: el.dataset.taskId,
+    checked: el.querySelector("input[type='checkbox']").checked,
+    note: el.querySelector("textarea")?.value || "",
+  }));
+}
+
+function savePlanningTasks() {
+  const state = {};
+  getPlanningTasks().forEach((task) => {
+    state[task.id] = { checked: task.checked, note: task.note };
+  });
+  localStorage.setItem(planningTaskKey, JSON.stringify(state));
+  updatePlanningProgress();
+}
+
+function loadPlanningTasks() {
+  const saved = JSON.parse(localStorage.getItem(planningTaskKey) || "{}");
+  document.querySelectorAll("[data-task-id]").forEach((el) => {
+    const item = saved[el.dataset.taskId];
+    if (!item) return;
+    el.querySelector("input[type='checkbox']").checked = Boolean(item.checked);
+    const note = el.querySelector("textarea");
+    if (note) note.value = item.note || "";
+  });
+  updatePlanningProgress();
+}
+
+function updatePlanningProgress() {
+  const tasks = getPlanningTasks();
+  if (!tasks.length) return;
+  const done = tasks.filter((task) => task.checked).length;
+  const percent = Math.round((done / tasks.length) * 100);
+  const label = document.querySelector("[data-progress-label]");
+  const fill = document.querySelector("[data-progress-fill]");
+  if (label) label.textContent = `${done}/${tasks.length} 已確認`;
+  if (fill) fill.style.width = `${percent}%`;
+}
+
+function setupPlanningTasks() {
+  if (!document.querySelector("[data-task-id]")) return;
+  loadPlanningTasks();
+  document.querySelectorAll("[data-task-id] input, [data-task-id] textarea").forEach((input) => {
+    input.addEventListener("change", savePlanningTasks);
+    input.addEventListener("input", savePlanningTasks);
+  });
+}
+
 function paragraph(text, options = {}) {
   const styleXml = options.style ? `<w:pStyle w:val="${options.style}"/>` : "";
   const alignXml = options.align ? `<w:jc w:val="${options.align}"/>` : "";
-  const spacingXml = options.after ? `<w:spacing w:after="${options.after}"/>` : "";
+  const spacingXml = options.after !== undefined ? `<w:spacing w:after="${options.after}"/>` : "";
   const pPr = styleXml || alignXml || spacingXml ? `<w:pPr>${styleXml}${alignXml}${spacingXml}</w:pPr>` : "";
   const boldXml = options.bold ? "<w:b/>" : "";
   const sizeXml = options.size ? `<w:sz w:val="${options.size}"/><w:szCs w:val="${options.size}"/>` : "";
@@ -270,14 +305,8 @@ function paragraph(text, options = {}) {
 
 function tableCell(text, width, options = {}) {
   const shade = options.shade ? `<w:shd w:val="clear" w:color="auto" w:fill="${options.shade}"/>` : "";
-  const valign = "<w:vAlign w:val=\"center\"/>";
-  const margins = "<w:tcMar><w:top w:w=\"120\" w:type=\"dxa\"/><w:left w:w=\"120\" w:type=\"dxa\"/><w:bottom w:w=\"120\" w:type=\"dxa\"/><w:right w:w=\"120\" w:type=\"dxa\"/></w:tcMar>";
-  return [
-    "<w:tc>",
-    `<w:tcPr><w:tcW w:w="${width}" w:type="dxa"/>${shade}${valign}${margins}</w:tcPr>`,
-    paragraph(text, { bold: options.bold, color: options.color, size: options.size || 21, after: 0 }),
-    "</w:tc>",
-  ].join("");
+  const margins = '<w:tcMar><w:top w:w="120" w:type="dxa"/><w:left w:w="120" w:type="dxa"/><w:bottom w:w="120" w:type="dxa"/><w:right w:w="120" w:type="dxa"/></w:tcMar>';
+  return `<w:tc><w:tcPr><w:tcW w:w="${width}" w:type="dxa"/>${shade}<w:vAlign w:val="center"/>${margins}</w:tcPr>${paragraph(text, { bold: options.bold, color: options.color, size: options.size || 21, after: 0 })}</w:tc>`;
 }
 
 function tableRow(cells, widths, options = {}) {
@@ -305,15 +334,9 @@ function buildDocumentXml(data) {
   <w:body>
     ${paragraph(data.title, { style: "Title", align: "center", after: 120 })}
     ${data.subtitle ? paragraph(data.subtitle, { style: "Subtitle", align: "center", after: 280 }) : ""}
-    <w:tbl>
-      <w:tblPr><w:tblW w:w="9200" w:type="dxa"/>${tableBorders()}</w:tblPr>
-      ${metaRows}
-    </w:tbl>
+    <w:tbl><w:tblPr><w:tblW w:w="9200" w:type="dxa"/>${tableBorders()}</w:tblPr>${metaRows}</w:tbl>
     ${paragraph("", { after: 160 })}
-    <w:tbl>
-      <w:tblPr><w:tblW w:w="9200" w:type="dxa"/>${tableBorders()}</w:tblPr>
-      ${agendaRows}
-    </w:tbl>
+    <w:tbl><w:tblPr><w:tblW w:w="9200" w:type="dxa"/>${tableBorders()}</w:tblPr>${agendaRows}</w:tbl>
     ${paragraph(`下載時間：${new Date().toLocaleString("zh-TW")}`, { align: "right", color: "5A6761", size: 18, after: 0 })}
     <w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="1134" w:right="1134" w:bottom="1134" w:left="1134"/></w:sectPr>
   </w:body>
@@ -452,4 +475,5 @@ function setupAgendaDownload() {
 document.addEventListener("DOMContentLoaded", () => {
   setupAgendaEditor();
   setupAgendaDownload();
+  setupPlanningTasks();
 });
