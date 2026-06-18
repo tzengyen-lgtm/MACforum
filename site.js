@@ -1,304 +1,249 @@
-const agendaKey = "mac-forum-agenda-state-v6";
-const tunghaiConfirmKey = "mac-forum-tunghai-confirm-v1";
-const chineseNumbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+/* =========================================================================
+   設定區：之後只要改這裡
+   ========================================================================= */
+const CONFIG = {
+  // Google 試算表「發佈到網路」的 CSV 連結（時間 / 議程 / 主講 / 確認方）
+  csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vRaUblBMIGANJGFJdTXMCIhW9kvSE8nqNkNxWrnypZMzvryc7sme9KYhwnVC7ZfyasaT9gsCLVlt_68/pub?output=csv",
+};
 
-function cleanText(value) {
-  return String(value || "").replace(/\s+/g, " ").trim();
+// 會議基本資訊（這部分不常改，直接放這裡；要改就改這裡的文字）
+const MEETING = {
+  title: "近期國際與兩岸情勢發展對 2026 年底臺灣地方選舉之影響",
+  subtitle: "2026/8/7 陸委會座談會",
+  date: "2026 年 8 月 7 日（星期五）",
+  time: "15:00–17:00",
+  venue: "國立中山大學社會科學院",
+  host: "國立中山大學政治學研究所",
+  cohost: "東海大學中國大陸暨區域發展研究中心",
+  dinner: "17:30 起，福園台菜海鮮餐廳（高雄市前金區成功一路266號9F）",
+  contact: "國立中山大學全球民主韌性計畫 執行秘書 賴以展｜yc27350173@mail.nsysu.edu.tw｜07-525-2000 分機 5622",
+};
+
+// 內建預設議程：當試算表還沒有資料或讀取失敗時，用這份墊著
+// 欄位順序：時間, 議程, 主講／負責人, 確認方
+const DEFAULT_AGENDA = [
+  ["15:00–15:05", "主持人開場", "陳宗巖／國立中山大學政治學研究所教授兼所長", "中山確認"],
+  ["15:05–15:15", "貴賓致詞", "邱垂正／大陸委員會主任委員", "中山確認"],
+  ["15:15–15:27", "與談一", "張峻豪／東海大學政治學系教授兼系主任", "東海確認"],
+  ["15:27–15:39", "與談二", "蔡榮祥／國立中正大學政治學系教授", "中山確認"],
+  ["15:39–15:51", "與談三", "林子立／東海大學政治學系教授", "東海確認"],
+  ["15:51–16:03", "與談四", "南部學者／待定，國立中山大學負責邀請", "中山確認"],
+  ["16:03–16:15", "與談五", "高雄市在地人士／待定，東海大學負責邀請", "東海確認"],
+  ["16:15–16:27", "與談六", "高雄市在地人士／待定，國立中山大學負責邀請", "中山確認"],
+  ["16:27–16:47", "綜合座談與現場問答", "主持人及全體與談人", "中山／東海確認"],
+  ["16:47–17:00", "主持人總結與閉幕", "邱垂正、陳宗巖", "中山確認"],
+  ["17:30 起", "晚宴", "福園台菜海鮮餐廳（高雄市前金區成功一路266號9F）", "中山／東海確認"],
+];
+
+/* =========================================================================
+   工具
+   ========================================================================= */
+function esc(s) {
+  return String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
-function setAgendaStatus(message) {
-  const el = document.querySelector("[data-agenda-status]");
-  if (el) el.textContent = message;
+// 簡易 CSV 解析（支援引號內含逗號、換行、雙引號跳脫）
+function parseCSV(text) {
+  const rows = [];
+  let row = [], field = "", inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (inQuotes) {
+      if (c === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += c;
+    } else if (c === '"') inQuotes = true;
+    else if (c === ",") { row.push(field); field = ""; }
+    else if (c === "\n") { row.push(field); rows.push(row); row = []; field = ""; }
+    else if (c === "\r") { /* 忽略 */ }
+    else field += c;
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows;
 }
 
-function setConfirmStatus(message) {
-  const el = document.querySelector("[data-confirm-status]");
-  if (el) el.textContent = message;
+function confirmTag(value) {
+  const v = (value || "").trim();
+  if (/東海/.test(v) && /中山/.test(v)) return `<span class="tag both">${esc(v)}</span>`;
+  if (/東海/.test(v)) return `<span class="tag tunghai">${esc(v)}</span>`;
+  if (/中山/.test(v)) return `<span class="tag nsysu">${esc(v)}</span>`;
+  return v ? `<span class="tag both">${esc(v)}</span>` : "";
 }
 
-function textFrom(selector) {
-  const el = document.querySelector(selector);
-  return el ? cleanText(el.textContent) : "";
-}
-
-function fieldText(row, field) {
-  return cleanText(row.querySelector(`[data-field="${field}"]`)?.textContent || "");
-}
-
-function agendaStateFromPage() {
-  return {
-    title: textFrom("[data-docx-title]"),
-    subtitle: textFrom("[data-docx-subtitle]"),
-    meta: [...document.querySelectorAll("[data-docx-meta]")].map((el) => ({
-      key: el.dataset.docxMeta,
-      value: cleanText(el.textContent),
-    })),
-    rows: [...document.querySelectorAll("[data-agenda-row]")].map((row) => ({
-      time: fieldText(row, "time"),
-      item: fieldText(row, "item"),
-      speaker: fieldText(row, "speaker"),
-      note: fieldText(row, "note"),
-      autoLabel: row.dataset.autoLabel || "",
-      customItem: row.dataset.customItem || "",
-    })),
-  };
-}
-
-function createAgendaRow(row = {}) {
-  const tr = document.createElement("tr");
-  tr.dataset.agendaRow = "";
-  if (row.autoLabel) tr.dataset.autoLabel = row.autoLabel;
-  if (row.customItem) tr.dataset.customItem = row.customItem;
-
-  tr.innerHTML = `
-    <td class="drag-cell no-print"><button class="icon-button" type="button" data-drag-handle title="拖拉排序">↕</button></td>
-    <td data-field="time" data-label="時間" contenteditable="true" spellcheck="false" class="editable-cell"></td>
-    <td data-field="item" data-label="議程" contenteditable="true" spellcheck="false" class="editable-cell"></td>
-    <td data-field="speaker" data-label="主講／負責人" contenteditable="true" spellcheck="false" class="editable-cell"></td>
-    <td data-field="note" data-label="備註" contenteditable="true" spellcheck="false" class="editable-cell screen-note no-print"></td>
-    <td class="row-actions no-print"><button class="mini-button" type="button" data-move-up>上移</button><button class="mini-button" type="button" data-move-down>下移</button><button class="mini-button danger" type="button" data-delete-row>刪除</button></td>
-  `;
-
-  tr.querySelector('[data-field="time"]').textContent = row.time || "";
-  tr.querySelector('[data-field="item"]').textContent = row.item || "";
-  tr.querySelector('[data-field="speaker"]').textContent = row.speaker || "";
-  tr.querySelector('[data-field="note"]').textContent = row.note || "待確認";
-  bindAgendaRow(tr);
-  return tr;
-}
-
-function saveAgendaState(message = "已本機暫存議程內容。") {
-  if (!document.querySelector("[data-agenda-editor]")) return;
-  localStorage.setItem(agendaKey, JSON.stringify(agendaStateFromPage()));
-  setAgendaStatus(message);
-}
-
-function renumberPanelRows() {
-  let count = 0;
-  document.querySelectorAll("[data-agenda-row]").forEach((row) => {
-    if (row.dataset.autoLabel !== "panel" || row.dataset.customItem === "true") return;
-    row.querySelector('[data-field="item"]').textContent = `與談${chineseNumbers[count] || count + 1}`;
-    count += 1;
+/* =========================================================================
+   渲染
+   ========================================================================= */
+function fillMeeting() {
+  document.querySelectorAll("[data-meeting]").forEach((el) => {
+    const key = el.dataset.meeting;
+    if (MEETING[key]) el.textContent = MEETING[key];
   });
 }
 
-function bindAgendaRow(row) {
-  const handle = row.querySelector("[data-drag-handle]");
-  if (handle) handle.draggable = true;
+let currentAgenda = DEFAULT_AGENDA;
 
-  handle?.addEventListener("dragstart", (event) => {
-    row.classList.add("is-dragging");
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", "");
-  });
-
-  handle?.addEventListener("dragend", () => {
-    row.classList.remove("is-dragging");
-    renumberPanelRows();
-    saveAgendaState("已調整議程順序。");
-  });
-
-  row.querySelectorAll("[contenteditable]").forEach((cell) => {
-    cell.addEventListener("input", () => {
-      if (cell.dataset.field === "item" && row.dataset.autoLabel === "panel") row.dataset.customItem = "true";
-      saveAgendaState("已本機暫存議程修改。");
-    });
-    cell.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        cell.blur();
-      }
-    });
-  });
-
-  row.querySelector("[data-move-up]")?.addEventListener("click", () => {
-    const previous = row.previousElementSibling;
-    if (previous) row.parentElement.insertBefore(row, previous);
-    renumberPanelRows();
-    saveAgendaState("已上移。");
-  });
-
-  row.querySelector("[data-move-down]")?.addEventListener("click", () => {
-    const next = row.nextElementSibling;
-    if (next) row.parentElement.insertBefore(next, row);
-    renumberPanelRows();
-    saveAgendaState("已下移。");
-  });
-
-  row.querySelector("[data-delete-row]")?.addEventListener("click", () => {
-    if (!confirm("確定要刪除這一列議程嗎？")) return;
-    row.remove();
-    renumberPanelRows();
-    saveAgendaState("已刪除議程列。");
-  });
+function renderAgenda(rows) {
+  currentAgenda = rows;
+  const body = document.querySelector("[data-agenda-body]");
+  if (!body) return;
+  body.innerHTML = rows
+    .map((r) => {
+      const [time, item, speaker, confirm] = [r[0] || "", r[1] || "", r[2] || "", r[3] || ""];
+      const isTunghai = /東海/.test(confirm) && !/中山/.test(confirm);
+      const isDinner = /晚宴/.test(item);
+      const cls = [isTunghai ? "is-tunghai" : "", isDinner ? "is-dinner" : ""].filter(Boolean).join(" ");
+      return `<tr class="${cls}">
+        <td class="time" data-label="時間">${esc(time)}</td>
+        <td class="item" data-label="議程">${esc(item)}</td>
+        <td data-label="主講／負責人">${esc(speaker)}</td>
+        <td data-label="確認方">${confirmTag(confirm)}</td>
+      </tr>`;
+    })
+    .join("");
 }
 
-function loadAgendaState() {
-  const raw = localStorage.getItem(agendaKey);
-  document.querySelectorAll("[data-agenda-row]").forEach(bindAgendaRow);
+function setSource(state, message) {
+  const el = document.querySelector("[data-source-status]");
+  if (!el) return;
+  el.className = "source-status " + state;
+  el.innerHTML = `<span class="dot"></span>${esc(message)}`;
+}
 
-  if (!raw) {
-    setAgendaStatus("填寫或調整後會本機暫存於目前瀏覽器。");
+async function loadAgenda() {
+  // 先放預設，畫面不會空白
+  renderAgenda(DEFAULT_AGENDA);
+  if (!CONFIG.csvUrl) {
+    setSource("fallback", "目前顯示內建預設議程（尚未設定試算表連結）。");
     return;
   }
-
   try {
-    const state = JSON.parse(raw);
-    const title = document.querySelector("[data-docx-title]");
-    const subtitle = document.querySelector("[data-docx-subtitle]");
-    if (title && state.title) title.textContent = state.title;
-    if (subtitle && state.subtitle) subtitle.textContent = state.subtitle;
-
-    (state.meta || []).forEach((item) => {
-      const target = document.querySelector(`[data-docx-meta="${CSS.escape(item.key)}"]`);
-      if (target) target.textContent = item.value || "";
-    });
-
-    const body = document.querySelector("[data-agenda-body]");
-    if (body && Array.isArray(state.rows) && state.rows.length) {
-      body.innerHTML = "";
-      state.rows.forEach((row) => body.appendChild(createAgendaRow(row)));
+    const res = await fetch(CONFIG.csvUrl, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const text = await res.text();
+    const parsed = parseCSV(text).filter((r) => r.some((c) => c && c.trim() !== ""));
+    // 第一列若是標題（含「時間」「議程」）就拿掉
+    const dataRows =
+      parsed.length && /時間|議程/.test((parsed[0][0] || "") + (parsed[0][1] || ""))
+        ? parsed.slice(1)
+        : parsed;
+    if (dataRows.length) {
+      renderAgenda(dataRows.map((r) => [r[0], r[1], r[2], r[3]]));
+      setSource("live", "議程為即時版本（讀取自 Google 試算表）。");
+    } else {
+      setSource("fallback", "試算表尚無議程資料，目前顯示內建預設議程。");
     }
-    renumberPanelRows();
-    setAgendaStatus("已載入這台裝置上次儲存的議程內容。");
-  } catch {
-    setAgendaStatus("先前儲存內容無法讀取，已使用預設議程。");
+  } catch (err) {
+    setSource("fallback", "無法連線試算表，目前顯示內建預設議程。");
   }
 }
 
-function dragAfterElement(container, y) {
-  const rows = [...container.querySelectorAll("[data-agenda-row]:not(.is-dragging)")];
-  return rows.reduce(
-    (closest, child) => {
-      const box = child.getBoundingClientRect();
-      const offset = y - box.top - box.height / 2;
-      if (offset < 0 && offset > closest.offset) return { offset, element: child };
-      return closest;
-    },
-    { offset: Number.NEGATIVE_INFINITY, element: null }
-  ).element;
-}
+/* =========================================================================
+   東海確認表單：填完按送出 → 透過 FormSubmit 寄回中山（表單 action 的信箱 + _cc）
+   ========================================================================= */
+function setupConfirmForm() {
+  const form = document.querySelector("[data-confirm-form]");
+  if (!form) return;
+  const note = form.querySelector("[data-form-note]");
 
-function setupAgendaEditor() {
-  const editor = document.querySelector("[data-agenda-editor]");
-  const body = document.querySelector("[data-agenda-body]");
-  if (!editor || !body) return;
-
-  loadAgendaState();
-
-  editor.querySelectorAll("[contenteditable]").forEach((el) => {
-    el.addEventListener("input", () => saveAgendaState("已本機暫存議程修改。"));
-    el.addEventListener("keydown", (event) => {
-      if (event.key === "Enter" && !event.shiftKey) {
-        event.preventDefault();
-        el.blur();
-      }
-    });
-  });
-
-  body.addEventListener("dragover", (event) => {
+  form.addEventListener("submit", async (event) => {
     event.preventDefault();
-    const dragging = body.querySelector(".is-dragging");
-    if (!dragging) return;
-    const after = dragAfterElement(body, event.clientY);
-    if (!after) body.appendChild(dragging);
-    else body.insertBefore(dragging, after);
-  });
-}
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) submitBtn.disabled = true;
+    if (note) note.textContent = "送出中…";
 
-function showTab(tabName) {
-  const current = tabName === "tunghai" ? "tunghai" : "agenda";
-  document.querySelectorAll("[data-tab-panel]").forEach((panel) => {
-    panel.hidden = panel.dataset.tabPanel !== current;
-  });
-  document.querySelectorAll("[data-tab-button]").forEach((button) => {
-    const active = button.dataset.tabButton === current;
-    button.classList.toggle("is-active", active);
-    button.setAttribute("aria-selected", String(active));
-  });
-  if (location.hash !== `#${current}`) history.replaceState(null, "", `#${current}`);
-}
+    const action = form.getAttribute("action") || "";
+    const ajaxUrl = action.replace("formsubmit.co/", "formsubmit.co/ajax/");
 
-function setupTabs() {
-  if (!document.querySelector("[data-tab-panel]")) return;
-  document.querySelectorAll("[data-tab-button]").forEach((button) => {
-    button.addEventListener("click", () => showTab(button.dataset.tabButton));
-  });
-  showTab(location.hash.replace("#", "") || "agenda");
-  window.addEventListener("hashchange", () => showTab(location.hash.replace("#", "")));
-}
-
-function confirmationStateFromPage() {
-  const state = {};
-  document.querySelectorAll("[data-confirm-field]").forEach((input) => {
-    state[input.dataset.confirmField] = input.value;
-  });
-  document.querySelectorAll("[data-choice-group]").forEach((group) => {
-    state[group.dataset.choiceGroup] = group.dataset.choiceValue || "";
-  });
-  return state;
-}
-
-function saveConfirmationState() {
-  localStorage.setItem(tunghaiConfirmKey, JSON.stringify(confirmationStateFromPage()));
-  setConfirmStatus(`已本機暫存 ${new Date().toLocaleTimeString("zh-TW", { hour: "2-digit", minute: "2-digit" })}`);
-}
-
-function loadConfirmationState() {
-  const raw = localStorage.getItem(tunghaiConfirmKey);
-  if (!raw) return;
-  try {
-    const state = JSON.parse(raw);
-    document.querySelectorAll("[data-confirm-field]").forEach((input) => {
-      input.value = state[input.dataset.confirmField] || "";
-    });
-    document.querySelectorAll("[data-choice-group]").forEach((group) => {
-      const value = state[group.dataset.choiceGroup] || "";
-      group.dataset.choiceValue = value;
-      group.querySelectorAll("[data-choice-value]").forEach((button) => {
-        button.classList.toggle("is-selected", button.dataset.choiceValue === value);
+    try {
+      const res = await fetch(ajaxUrl, {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: new FormData(form),
       });
-    });
-    setConfirmStatus("已載入上次儲存內容");
-  } catch {
-    setConfirmStatus("先前儲存內容無法讀取");
-  }
-}
-
-function setupTunghaiConfirmation() {
-  if (!document.querySelector("[data-confirm-field], [data-choice-group]")) return;
-  loadConfirmationState();
-
-  document.querySelectorAll("[data-confirm-field]").forEach((input) => {
-    input.addEventListener("input", saveConfirmationState);
-  });
-
-  document.querySelectorAll("[data-choice-group]").forEach((group) => {
-    group.querySelectorAll("[data-choice-value]").forEach((button) => {
-      button.addEventListener("click", () => {
-        group.dataset.choiceValue = button.dataset.choiceValue;
-        group.querySelectorAll("[data-choice-value]").forEach((item) => {
-          item.classList.toggle("is-selected", item === button);
-        });
-        saveConfirmationState();
-      });
-    });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      form.innerHTML =
+        '<p class="form-done">✅ 已送出，感謝東海協助確認！回覆已寄回中山，我們會盡快跟進。</p>';
+    } catch (err) {
+      if (submitBtn) submitBtn.disabled = false;
+      if (note)
+        note.textContent = "送出失敗，請稍後再試，或直接回覆上方聯絡人 Email。";
+    }
   });
 }
 
-function setupPdfDownload() {
-  document.querySelector("[data-download-pdf]")?.addEventListener("click", () => {
-    saveAgendaState("已依目前畫面準備 PDF。");
-    showTab("agenda");
-    document.body.classList.add("print-agenda");
-    window.print();
-  });
-  window.addEventListener("afterprint", () => document.body.classList.remove("print-agenda"));
+/* =========================================================================
+   下載 Word 議程（乾淨版，不含「確認方」欄）
+   ========================================================================= */
+function downloadWord() {
+  const infoRows = [
+    ["日　期", MEETING.date],
+    ["時　間", MEETING.time],
+    ["地　點", MEETING.venue],
+    ["主　辦", MEETING.host],
+    ["協　辦", MEETING.cohost],
+    ["晚　宴", MEETING.dinner],
+  ]
+    .map(([k, v]) => `<tr><td class="k">${esc(k)}</td><td class="v">${esc(v)}</td></tr>`)
+    .join("");
+
+  const bodyRows = currentAgenda
+    .map((r) => {
+      const dinner = /晚宴/.test(r[1] || "");
+      return `<tr${dinner ? ' class="dinner"' : ""}><td class="t">${esc(r[0])}</td><td class="i">${esc(
+        r[1]
+      )}</td><td class="s">${esc(r[2])}</td></tr>`;
+    })
+    .join("");
+
+  const doc = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+  <head><meta charset="utf-8"><title>${esc(MEETING.subtitle)} 議程</title>
+  <style>
+    @page { size: A4; margin: 1.5cm 1.9cm; }
+    body { font-family: "Microsoft JhengHei","Noto Sans TC",sans-serif; color:#222; font-size:10.5pt; line-height:1.4; }
+    .title { text-align:center; font-size:18pt; font-weight:bold; margin:2pt 0 4pt; }
+    .sub { text-align:center; font-size:10pt; color:#888; letter-spacing:3pt; margin:0 0 12pt; }
+    hr.rule { border:none; border-top:0.75pt solid #cfcfcf; margin:0 0 11pt; }
+    table.info { border-collapse:collapse; margin:0 auto 13pt; }
+    table.info td { border:none; padding:2pt 0; font-size:9.5pt; vertical-align:top; }
+    table.info td.k { color:#8a6d1f; font-weight:bold; padding-right:16pt; white-space:nowrap; letter-spacing:1pt; }
+    table.info td.v { color:#333; }
+    table.ag { border-collapse:collapse; width:100%; }
+    table.ag th { text-align:left; font-size:9pt; color:#666; font-weight:bold; letter-spacing:1pt; padding:0 9pt 6pt; border-bottom:1.5pt solid #2a6450; }
+    table.ag th.tt { width:78pt; }
+    table.ag td { border:none; border-bottom:0.5pt solid #e3e3e3; padding:6pt 9pt; font-size:10pt; vertical-align:top; }
+    table.ag td.t { color:#777; white-space:nowrap; }
+    table.ag td.i { font-weight:bold; color:#1c4838; }
+    table.ag tr.dinner td { color:#999; font-style:italic; }
+  </style></head>
+  <body>
+    <div class="title">${esc(MEETING.title)}</div>
+    <div class="sub">${esc(MEETING.subtitle)}</div>
+    <hr class="rule">
+    <table class="info">${infoRows}</table>
+    <table class="ag">
+      <thead><tr><th class="tt">時間</th><th>議程</th><th>主講／負責人</th></tr></thead>
+      <tbody>${bodyRows}</tbody>
+    </table>
+  </body></html>`;
+
+  const blob = new Blob(["﻿", doc], { type: "application/msword" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "2026-08-07_陸委會座談會議程.doc";
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
+/* =========================================================================
+   啟動
+   ========================================================================= */
 document.addEventListener("DOMContentLoaded", () => {
-  setupTabs();
-  setupAgendaEditor();
-  setupTunghaiConfirmation();
-  setupPdfDownload();
+  fillMeeting();
+  setupConfirmForm();
+  loadAgenda();
+  document.querySelector("[data-download-word]")?.addEventListener("click", downloadWord);
 });
