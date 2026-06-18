@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>分工確認｜2026/8/7 陸委會座談會</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <a class="brand" href="index.html">
+          <strong>2026/8/7 陸委會座談會</strong>
+          <span>分工確認</span>
+        </a>
+        <nav class="nav" aria-label="主要導覽">
+          <a href="index.html">首頁</a>
+          <a href="agenda.html">議程</a>
+          <a href="tasks.html" aria-current="page">分工確認</a>
+        </nav>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="wrap">
+        <p class="eyebrow">分工勾稽</p>
+        <h1>中山、東海與陸委會相關待確認事項</h1>
+        <p class="lead">勾選與備註會先存在這台電腦的瀏覽器。完成後可產生回報，複製給承辦窗口，或在 GitHub Pages 發布後開啟 GitHub Issue 回報。</p>
+      </div>
+    </section>
+
+    <main class="main">
+      <div class="wrap">
+        <section class="band">
+          <div class="task-toolbar">
+            <div class="progress" aria-label="確認進度">
+              <span data-progress-label>0/0 已確認</span>
+              <div class="progress-track" aria-hidden="true">
+                <div class="progress-fill" data-progress-fill></div>
+              </div>
+            </div>
+            <div class="actions" style="margin-top: 0;">
+              <button class="button secondary" type="button" data-generate-report>產生回報</button>
+              <button class="button secondary" type="button" data-copy-report>複製回報</button>
+              <button class="button secondary" type="button" data-open-issue>開 GitHub 回報</button>
+              <button class="button danger" type="button" data-reset-tasks>清除本機勾選</button>
+            </div>
+          </div>
+
+          <div class="notice">
+            純 GitHub Pages 不能直接把勾選結果寫回網站。若要讓主辦端看見最新狀態，請使用上方回報功能；若之後要做成多人即時同步，需再接 Google 表單、GitHub Issues API 或其他後端服務。
+          </div>
+        </section>
+
+        <section class="band task-groups" aria-label="分工項目">
+          <div class="task-group">
+            <h2>東海方確認</h2>
+            <div class="task-list">
+              <div class="task-item" data-task-id="tunghai-speakers" data-owner="東海">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認東海與談者出席名單">
+                  <div>
+                    <div class="task-label">確認東海與談者出席名單</div>
+                    <div class="small">張峻豪教授、林子立教授，以及東海端其他陪同或列席人員。</div>
+                  </div>
+                  <span class="owner">東海</span>
+                </div>
+                <div class="task-note"><textarea placeholder="可填寫已確認名單、職稱、聯絡方式或待回覆狀態"></textarea></div>
+              </div>
+
+              <div class="task-item" data-task-id="tunghai-local-guest" data-owner="東海">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認東海負責邀請之高雄市在地人士">
+                  <div>
+                    <div class="task-label">確認東海負責邀請之高雄市在地人士</div>
+                    <div class="small">包含姓名、職稱、單位、聯絡方式與是否出席晚宴。</div>
+                  </div>
+                  <span class="owner">東海</span>
+                </div>
+                <div class="task-note"><textarea placeholder="請填寫邀請對象與目前進度"></textarea></div>
+              </div>
+
+              <div class="task-item" data-task-id="tunghai-dinner-list" data-owner="東海">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認東海晚宴名單">
+                  <div>
+                    <div class="task-label">確認東海晚宴名單</div>
+                    <div class="small">包含出席人數、姓名、葷素、特殊飲食需求與交通需求。</div>
+                  </div>
+                  <span class="owner">東海</span>
+                </div>
+                <div class="task-note"><textarea placeholder="例：張峻豪／葷／需或不需交通協助"></textarea></div>
+              </div>
+
+              <div class="task-item" data-task-id="tunghai-mac-payment" data-owner="東海">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認陸委會是否有自己負擔的金額">
+                  <div>
+                    <div class="task-label">確認陸委會是否有自己負擔的金額</div>
+                    <div class="small">例如出席費、交通費、晚宴或其他行政費用是否由陸委會自付或另有補助規則。</div>
+                  </div>
+                  <span class="owner">東海</span>
+                </div>
+                <div class="task-note"><textarea placeholder="請填寫陸委會端初步回覆或待確認窗口"></textarea></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-group">
+            <h2>中山方確認</h2>
+            <div class="task-list">
+              <div class="task-item" data-task-id="nsysu-venue" data-owner="中山">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認地點與場地">
+                  <div>
+                    <div class="task-label">確認地點與場地</div>
+                    <div class="small">國立中山大學社會科學院之實際會議室、容納人數、設備與場佈。</div>
+                  </div>
+                  <span class="owner">中山</span>
+                </div>
+                <div class="task-note"><textarea placeholder="請填寫會議室名稱、設備需求、場佈或借用狀態"></textarea></div>
+              </div>
+
+              <div class="task-item" data-task-id="nsysu-local-guest" data-owner="中山">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認中山負責邀請之南部學者與在地人士">
+                  <div>
+                    <div class="task-label">確認中山負責邀請之南部學者與高雄市在地人士</div>
+                    <div class="small">議程中與談四、與談六之姓名、職稱、單位與出席狀態。</div>
+                  </div>
+                  <span class="owner">中山</span>
+                </div>
+                <div class="task-note"><textarea placeholder="請填寫邀請對象與目前進度"></textarea></div>
+              </div>
+
+              <div class="task-item" data-task-id="nsysu-honorarium" data-owner="中山">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認出席費">
+                  <div>
+                    <div class="task-label">確認出席費</div>
+                    <div class="small">確認與談人、主持人或在地人士是否支付出席費，以及標準與請款流程。</div>
+                  </div>
+                  <span class="owner">中山</span>
+                </div>
+                <div class="task-note"><textarea placeholder="請填寫金額標準、支付對象與經費來源"></textarea></div>
+              </div>
+
+              <div class="task-item" data-task-id="nsysu-transport" data-owner="中山">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認交通費">
+                  <div>
+                    <div class="task-label">確認交通費</div>
+                    <div class="small">確認與談者交通費補助、報支單據、接送安排與經費來源。</div>
+                  </div>
+                  <span class="owner">中山</span>
+                </div>
+                <div class="task-note"><textarea placeholder="請填寫交通費規則、需接送名單與負擔單位"></textarea></div>
+              </div>
+
+              <div class="task-item" data-task-id="nsysu-dinner-budget" data-owner="中山">
+                <div class="task-main">
+                  <input type="checkbox" aria-label="確認晚宴由陸委會或中山負擔">
+                  <div>
+                    <div class="task-label">確認晚宴由陸委會負擔或中山負擔</div>
+                    <div class="small">含晚宴地點、預估桌數、人數、每人或每桌預算，以及支付方式。</div>
+                  </div>
+                  <span class="owner">中山</span>
+                </div>
+                <div class="task-note"><textarea placeholder="請填寫晚宴地點、預算與負擔單位"></textarea></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="band">
+          <h2>回報內容</h2>
+          <p class="small">按「產生回報」後，可複製給承辦窗口；若網站已發布到 GitHub Pages，也可以用「開 GitHub 回報」建立 Issue。</p>
+          <textarea class="report-box" data-report-box placeholder="回報文字會出現在這裡"></textarea>
+        </section>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap">勾選狀態儲存在目前瀏覽器；不同電腦或手機不會自動同步。</div>
+    </footer>
+    <script src="site.js"></script>
+  </body>
+</html>
