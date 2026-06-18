@@ -14,7 +14,7 @@ if ($remote -notcontains "origin") {
   git remote add origin "https://github.com/tzengyen-lgtm/MACforum.git"
 }
 
-git add index.html agenda.html tasks.html styles.css site.js README.md .nojekyll publish-to-github.ps1
+git add index.html agenda.html styles.css site.js README.md .nojekyll publish-to-github.ps1
 
 $changes = git status --porcelain
 if ($changes) {

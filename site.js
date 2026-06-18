@@ -3,8 +3,7 @@ const site = {
   fileTitle: "20260807_陸委會座談會議程",
 };
 
-const agendaKey = "mac-forum-agenda-state-v2";
-const taskKey = "mac-forum-task-state-v1";
+const agendaKey = "mac-forum-agenda-state-v3";
 const chineseNumbers = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
 
 function cleanText(value) {
@@ -450,142 +449,7 @@ function setupAgendaDownload() {
   if (button) button.addEventListener("click", downloadAgendaDocx);
 }
 
-function getTasks() {
-  return [...document.querySelectorAll("[data-task-id]")].map((el) => ({
-    id: el.dataset.taskId,
-    owner: el.dataset.owner,
-    label: cleanText(el.querySelector(".task-label").textContent),
-    checked: el.querySelector("input[type='checkbox']").checked,
-    note: cleanText(el.querySelector("textarea").value),
-  }));
-}
-
-function saveTasks() {
-  const state = {};
-  getTasks().forEach((task) => {
-    state[task.id] = { checked: task.checked, note: task.note };
-  });
-  localStorage.setItem(taskKey, JSON.stringify(state));
-  updateProgress();
-}
-
-function loadTasks() {
-  const saved = JSON.parse(localStorage.getItem(taskKey) || "{}");
-  document.querySelectorAll("[data-task-id]").forEach((el) => {
-    const item = saved[el.dataset.taskId];
-    if (!item) return;
-    el.querySelector("input[type='checkbox']").checked = Boolean(item.checked);
-    el.querySelector("textarea").value = item.note || "";
-  });
-  updateProgress();
-}
-
-function updateProgress() {
-  const tasks = getTasks();
-  if (!tasks.length) return;
-  const done = tasks.filter((task) => task.checked).length;
-  const percent = Math.round((done / tasks.length) * 100);
-  const label = document.querySelector("[data-progress-label]");
-  const fill = document.querySelector("[data-progress-fill]");
-  if (label) label.textContent = `${done}/${tasks.length} 已確認`;
-  if (fill) fill.style.width = `${percent}%`;
-}
-
-function buildTaskReport() {
-  const tasks = getTasks();
-  const lines = [
-    "# 2026/8/7 陸委會座談會分工確認回報",
-    "",
-    `回報時間：${new Date().toLocaleString("zh-TW")}`,
-    "",
-    "## 已確認",
-    ...tasks.filter((task) => task.checked).map((task) => `- [x] ${task.owner}｜${task.label}${task.note ? `：${task.note}` : ""}`),
-    "",
-    "## 尚待確認",
-    ...tasks.filter((task) => !task.checked).map((task) => `- [ ] ${task.owner}｜${task.label}${task.note ? `：${task.note}` : ""}`),
-  ];
-  return lines.join("\n");
-}
-
-function repoFromLocation() {
-  const host = window.location.hostname;
-  const match = host.match(/^([^.]+)\.github\.io$/);
-  if (!match) return null;
-  const owner = match[1];
-  const repo = window.location.pathname.split("/").filter(Boolean)[0];
-  if (!repo) return null;
-  return { owner, repo };
-}
-
-async function copyText(text) {
-  if (navigator.clipboard) {
-    await navigator.clipboard.writeText(text);
-    return;
-  }
-  const area = document.createElement("textarea");
-  area.value = text;
-  document.body.appendChild(area);
-  area.select();
-  document.execCommand("copy");
-  area.remove();
-}
-
-function setupTasks() {
-  if (!document.querySelector("[data-task-id]")) return;
-
-  loadTasks();
-
-  document.querySelectorAll("[data-task-id] input, [data-task-id] textarea").forEach((input) => {
-    input.addEventListener("change", saveTasks);
-    input.addEventListener("input", saveTasks);
-  });
-
-  const reportBox = document.querySelector("[data-report-box]");
-  const reportButton = document.querySelector("[data-generate-report]");
-  const copyButton = document.querySelector("[data-copy-report]");
-  const issueButton = document.querySelector("[data-open-issue]");
-  const resetButton = document.querySelector("[data-reset-tasks]");
-
-  reportButton?.addEventListener("click", () => {
-    reportBox.value = buildTaskReport();
-  });
-
-  copyButton?.addEventListener("click", async () => {
-    const text = reportBox.value || buildTaskReport();
-    reportBox.value = text;
-    await copyText(text);
-    copyButton.textContent = "已複製";
-    window.setTimeout(() => (copyButton.textContent = "複製回報"), 1600);
-  });
-
-  issueButton?.addEventListener("click", () => {
-    const text = reportBox.value || buildTaskReport();
-    reportBox.value = text;
-    const repo = repoFromLocation();
-    if (!repo) {
-      alert("目前不是 GitHub Pages 網址，請先複製回報文字，或發布到 GitHub Pages 後再使用。");
-      return;
-    }
-    const url = new URL(`https://github.com/${repo.owner}/${repo.repo}/issues/new`);
-    url.searchParams.set("title", "2026/8/7 陸委會座談會分工確認回報");
-    url.searchParams.set("body", text);
-    window.open(url.toString(), "_blank", "noopener");
-  });
-
-  resetButton?.addEventListener("click", () => {
-    if (!confirm("確定要清除這台電腦上的勾選與備註嗎？")) return;
-    localStorage.removeItem(taskKey);
-    document.querySelectorAll("[data-task-id]").forEach((el) => {
-      el.querySelector("input[type='checkbox']").checked = false;
-      el.querySelector("textarea").value = "";
-    });
-    updateProgress();
-    if (reportBox) reportBox.value = "";
-  });
-}
-
 document.addEventListener("DOMContentLoaded", () => {
   setupAgendaEditor();
   setupAgendaDownload();
-  setupTasks();
 });

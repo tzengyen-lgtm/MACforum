@@ -418,6 +418,10 @@ th {
   padding: 8px 0;
 }
 
+.agenda-meta .meta-wide {
+  grid-column: 1 / -1;
+}
+
 .agenda-meta b {
   color: var(--muted);
   min-width: 86px;
