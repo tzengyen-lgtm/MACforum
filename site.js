@@ -135,7 +135,7 @@ function loadAgendaState() {
   document.querySelectorAll("[data-agenda-row]").forEach(bindAgendaRow);
 
   if (!raw) {
-    setAgendaStatus("目前內容會暫存在這台裝置的瀏覽器。");
+    setAgendaStatus("填寫或調整後會自動儲存在這台裝置。");
     return;
   }
 
@@ -200,19 +200,6 @@ function setupAgendaEditor() {
     const after = dragAfterElement(body, event.clientY);
     if (!after) body.appendChild(dragging);
     else body.insertBefore(dragging, after);
-  });
-
-  document.querySelector("[data-add-agenda-row]")?.addEventListener("click", () => {
-    body.appendChild(createAgendaRow({ time: "", item: "新增議程", speaker: "姓名／單位" }));
-    saveAgendaState("已新增議程列。");
-  });
-
-  document.querySelector("[data-save-agenda]")?.addEventListener("click", () => saveAgendaState("已儲存目前議程內容。"));
-
-  document.querySelector("[data-reset-agenda]")?.addEventListener("click", () => {
-    if (!confirm("確定要恢復預設議程嗎？這會清除這台裝置儲存的議程調整。")) return;
-    localStorage.removeItem(agendaKey);
-    window.location.reload();
   });
 }
 
