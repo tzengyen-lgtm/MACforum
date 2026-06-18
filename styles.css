@@ -472,8 +472,46 @@ th {
 
   .agenda-table {
     display: block;
-    overflow-x: auto;
+  }
+
+  .agenda-table thead {
+    display: none;
+  }
+
+  .agenda-table tbody,
+  .agenda-table tr,
+  .agenda-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .agenda-table tr {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    padding: 10px 12px;
+    background: #fff;
+  }
+
+  .agenda-table td {
+    border-bottom: 0;
+    padding: 5px 0;
     white-space: normal;
+  }
+
+  .agenda-table td::before {
+    content: attr(data-label);
+    display: block;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    margin-bottom: 1px;
+  }
+
+  .agenda-table td:first-child {
+    color: var(--green);
+    font-weight: 800;
+    font-size: 1.05rem;
   }
 
   .task-main {
