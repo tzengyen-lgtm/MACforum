@@ -146,6 +146,22 @@ function setupConfirmForm() {
   if (!form) return;
   const note = form.querySelector("[data-form-note]");
 
+  // Q1：選「需調整或待補」才顯示與談人輸入欄；隱藏時停用該欄，避免空值被寄出
+  const adjustField = form.querySelector("[data-adjust-field]");
+  const adjustInput = adjustField?.querySelector("textarea, input");
+  function syncAdjust() {
+    const chosen = form.querySelector("[data-adjust]:checked");
+    const show = chosen?.dataset.adjust === "show";
+    if (adjustField) adjustField.hidden = !show;
+    if (adjustInput) adjustInput.disabled = !show;
+  }
+  if (adjustField) {
+    if (adjustInput) adjustInput.disabled = true;
+    form.querySelectorAll("[data-adjust]").forEach((radio) => {
+      radio.addEventListener("change", syncAdjust);
+    });
+  }
+
   form.addEventListener("submit", async (event) => {
     event.preventDefault();
     const submitBtn = form.querySelector('button[type="submit"]');

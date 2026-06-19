@@ -83,18 +83,25 @@
             <input type="hidden" name="_captcha" value="false">
 
             <div class="field">
-              <label>1. 議程中標示「東海確認」的與談人是否已敲定？（姓名、職稱，是否需調整）</label>
-              <textarea name="與談人確認" rows="2" placeholder="例：與談一 張峻豪確認出席；與談五 在地人士待補…"></textarea>
+              <label>1. 議程中標示「東海確認」的與談人，是否已全部確認出席？</label>
+              <div class="radio-row">
+                <label class="radio"><input type="radio" name="東海與談人是否確認出席" value="已全部確認出席" data-adjust="hide"> 已全部確認出席</label>
+                <label class="radio"><input type="radio" name="東海與談人是否確認出席" value="需調整或待補" data-adjust="show"> 需調整或待補</label>
+              </div>
+              <div class="field" data-adjust-field hidden style="margin:12px 0 0;">
+                <label>請填寫需調整或待補的與談人（姓名、職稱）</label>
+                <textarea name="與談人調整或待補內容" rows="2" placeholder="例：與談五 改為 OOO（高雄市議員）；與談三 待補"></textarea>
+              </div>
             </div>
 
             <div class="field-grid">
               <div class="field">
                 <label>2. 陸委會出席座談會人數</label>
-                <input type="number" name="座談會出席人數" min="0" inputmode="numeric" placeholder="填數字">
+                <input type="number" name="陸委會出席座談會人數" min="0" inputmode="numeric" placeholder="填數字">
               </div>
               <div class="field">
                 <label>3. 陸委會出席晚宴人數</label>
-                <input type="number" name="晚宴出席人數" min="0" inputmode="numeric" placeholder="填數字">
+                <input type="number" name="陸委會出席晚宴人數" min="0" inputmode="numeric" placeholder="填數字">
               </div>
             </div>
 
@@ -109,16 +116,16 @@
             <div class="field">
               <label>5. 陸委會主委是否需要支付出席費</label>
               <div class="radio-row">
-                <label class="radio"><input type="radio" name="主委出席費" value="是"> 是</label>
-                <label class="radio"><input type="radio" name="主委出席費" value="否"> 否</label>
+                <label class="radio"><input type="radio" name="陸委會主委是否需支付出席費" value="是"> 是</label>
+                <label class="radio"><input type="radio" name="陸委會主委是否需支付出席費" value="否"> 否</label>
               </div>
             </div>
 
             <div class="field">
               <label>6. 陸委會同仁交通費核銷單位</label>
               <div class="radio-row">
-                <label class="radio"><input type="radio" name="交通費核銷單位" value="陸委會"> 陸委會</label>
-                <label class="radio"><input type="radio" name="交通費核銷單位" value="中山大學"> 中山大學</label>
+                <label class="radio"><input type="radio" name="陸委會同仁交通費核銷單位" value="陸委會"> 陸委會</label>
+                <label class="radio"><input type="radio" name="陸委會同仁交通費核銷單位" value="中山大學"> 中山大學</label>
               </div>
             </div>
 
@@ -129,7 +136,7 @@
               </div>
               <div class="field">
                 <label>其他備註（選填）</label>
-                <input type="text" name="備註" placeholder="其他想補充的事項">
+                <input type="text" name="其他備註" placeholder="其他想補充的事項">
               </div>
             </div>
 
