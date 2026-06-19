@@ -101,6 +101,58 @@ function renderAgenda(rows) {
       </tr>`;
     })
     .join("");
+  renderSpeakerConfirm();
+}
+
+// 依議程「確認方＝東海」的列，逐一產生與談人確認控制項（待定者改為輸入欄）
+function renderSpeakerConfirm() {
+  const host = document.querySelector("[data-tunghai-speakers]");
+  if (!host) return;
+  const speakers = currentAgenda.filter(
+    (r) => /東海/.test(r[3] || "") && !/中山/.test(r[3] || "")
+  );
+  if (!speakers.length) {
+    host.innerHTML = '<p class="hint" style="margin:0;">目前議程沒有標示東海確認的與談人。</p>';
+    return;
+  }
+
+  host.innerHTML = speakers
+    .map((r) => {
+      const item = (r[1] || "").trim();
+      const speaker = (r[2] || "").trim();
+      const tbd = /待定|待補|TBD/i.test(speaker);
+      if (tbd) {
+        const role = speaker.replace(/[／/]\s*待定.*$/, "").trim();
+        return `<div class="speaker-item">
+          <div class="speaker-q"><b>${esc(item)}</b>　${esc(speaker)}</div>
+          <input type="text" name="${esc(item)}與談人（待補）" placeholder="尚未確定，請填寫與談人姓名、職稱（${esc(role)} ○○○）">
+        </div>`;
+      }
+      const groupName = `${item}（${speaker}）`;
+      return `<div class="speaker-item" data-speaker-block>
+        <div class="speaker-q"><b>${esc(item)}</b>　${esc(speaker)}</div>
+        <div class="radio-row">
+          <label class="radio"><input type="radio" name="${esc(groupName)}" value="確認出席" data-adjust="hide"> 確認出席</label>
+          <label class="radio"><input type="radio" name="${esc(groupName)}" value="需調整" data-adjust="show"> 需調整</label>
+        </div>
+        <div class="adjust-field" data-adjust-field hidden>
+          <input type="text" name="${esc(item)}調整後與談人" placeholder="請填寫調整後的與談人姓名、職稱" disabled>
+        </div>
+      </div>`;
+    })
+    .join("");
+
+  host.querySelectorAll("[data-speaker-block]").forEach((block) => {
+    const field = block.querySelector("[data-adjust-field]");
+    const input = field?.querySelector("input, textarea");
+    block.querySelectorAll("[data-adjust]").forEach((radio) => {
+      radio.addEventListener("change", () => {
+        const show = block.querySelector('[data-adjust="show"]').checked;
+        if (field) field.hidden = !show;
+        if (input) input.disabled = !show;
+      });
+    });
+  });
 }
 
 function setSource(state, message) {
@@ -145,22 +197,6 @@ function setupConfirmForm() {
   const form = document.querySelector("[data-confirm-form]");
   if (!form) return;
   const note = form.querySelector("[data-form-note]");
-
-  // Q1：選「需調整或待補」才顯示與談人輸入欄；隱藏時停用該欄，避免空值被寄出
-  const adjustField = form.querySelector("[data-adjust-field]");
-  const adjustInput = adjustField?.querySelector("textarea, input");
-  function syncAdjust() {
-    const chosen = form.querySelector("[data-adjust]:checked");
-    const show = chosen?.dataset.adjust === "show";
-    if (adjustField) adjustField.hidden = !show;
-    if (adjustInput) adjustInput.disabled = !show;
-  }
-  if (adjustField) {
-    if (adjustInput) adjustInput.disabled = true;
-    form.querySelectorAll("[data-adjust]").forEach((radio) => {
-      radio.addEventListener("change", syncAdjust);
-    });
-  }
 
   form.addEventListener("submit", async (event) => {
     event.preventDefault();

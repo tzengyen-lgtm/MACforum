@@ -138,6 +138,14 @@ main { padding: 32px 0 60px; }
 .radio-row .radio input { accent-color: var(--green); }
 .form-done { font-size: 1.05rem; font-weight: 600; color: var(--green-dark); background: var(--green-soft); border-radius: 10px; padding: 18px 20px; margin: 0; }
 
+/* ---- Per-speaker confirmation ---- */
+.speaker-confirm { border: 1px solid var(--line); border-radius: 11px; padding: 4px 16px; }
+.speaker-item { padding: 14px 0; border-bottom: 1px solid var(--line); }
+.speaker-item:last-child { border-bottom: none; }
+.speaker-q { font-size: 0.96rem; margin-bottom: 9px; }
+.speaker-q b { color: var(--green-dark); margin-right: 4px; }
+.adjust-field { margin-top: 10px; }
+
 @media (max-width: 560px) {
   .confirm-form .field-grid { grid-template-columns: 1fr; }
 }

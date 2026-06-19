@@ -83,14 +83,9 @@
             <input type="hidden" name="_captcha" value="false">
 
             <div class="field">
-              <label>1. 議程中標示「東海確認」的與談人，是否已全部確認出席？</label>
-              <div class="radio-row">
-                <label class="radio"><input type="radio" name="東海與談人是否確認出席" value="已全部確認出席" data-adjust="hide"> 已全部確認出席</label>
-                <label class="radio"><input type="radio" name="東海與談人是否確認出席" value="需調整或待補" data-adjust="show"> 需調整或待補</label>
-              </div>
-              <div class="field" data-adjust-field hidden style="margin:12px 0 0;">
-                <label>請填寫需調整或待補的與談人（姓名、職稱）</label>
-                <textarea name="與談人調整或待補內容" rows="2" placeholder="例：與談五 改為 OOO（高雄市議員）；與談三 待補"></textarea>
+              <label>1. 議程中由東海負責邀請的與談人，請逐一確認</label>
+              <div class="speaker-confirm" data-tunghai-speakers>
+                <p class="hint" style="margin:0;">載入與談人中…</p>
               </div>
             </div>
 
